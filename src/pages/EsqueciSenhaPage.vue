@@ -2,41 +2,37 @@
   <q-page class="flex flex-center">
     <div class="row">
       <q-card class="q-pa-xl rounded-border bg-dark text-white borda-card">
+        <q-btn href="login" flat icon="arrow_back"></q-btn>
         <q-card-section class="flex flex-center">
           <span class="text-h3"
             ><strong>KN</strong><strong class="text-secondary">UP</strong></span
           >
         </q-card-section>
-        <q-card-section class="q-gutter-sm">
-          <div><span class="text-subtitle1">Usuário</span></div>
-          <q-input
-            dense
-            rounded
-            outlined
-            bg-color="white"
-            v-model="usuario"
-          ></q-input>
-          <div><span class="text-subtitle1">Senha</span></div>
-          <q-input
-            dense
-            rounded
-            outlined
-            bg-color="white"
-            v-model="senha"
-          ></q-input>
-          <div class="text-center text-caption">
-            <a href="esqueci-senha" class="senha">Esqueci minha senha</a>
+
+        <q-card-section class="q-gutter-sm text-center">
+          <div><span class="text-h6">Redefinir Senha</span></div>
+          <div class="wrap">
+            <span class="text-subtitle1"
+              >Para recuperar sua senha, preencha o campo abaixo com seu e-mail
+              cadtrado.</span
+            >
           </div>
         </q-card-section>
 
+        <q-card-section class="q-gutter-sm text-center">
+          <q-input
+            dense
+            rounded
+            outlined
+            bg-color="white"
+            label="E-mail"
+            v-model="email"
+          ></q-input>
+        </q-card-section>
+
         <q-card-actions class="flex flex-center"
-          ><q-btn rounded color="secondary" text-color="dark" padding="sm xl"
-            ><strong>Entrar</strong></q-btn
-          ></q-card-actions
-        >
-        <q-card-actions class="flex flex-center text-secondary"
-          ><a href="cadastro" class="cadastro"
-            ><strong>Se cadastrar</strong></a
+          ><q-btn rounded color="secondary" text-color="dark" padding="sm lg"
+            ><strong>Enviar</strong></q-btn
           ></q-card-actions
         >
       </q-card>
@@ -48,12 +44,11 @@
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-  name: "LoginPage",
+  name: "EsqueciSenha",
 
   setup() {
     const form = ref({
-      usuario: "",
-      senha: "",
+      email: "",
     });
 
     return {
@@ -70,12 +65,5 @@ export default defineComponent({
 .borda-card {
   box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5); /* Sombreamento */
   padding: 50px; /* Espaçamento interno */
-}
-.cadastro {
-  color: #ffcd29;
-}
-.senha {
-  color: white;
-  text-decoration: none;
 }
 </style>

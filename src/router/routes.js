@@ -3,16 +3,26 @@ const routes = [
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/IndexPage.vue") },
+      { path: "", component: () => import("src/pages/LandingPage.vue") },
       {
         path: "/login",
-        name: "loginPage",
+        name: "login",
         component: () => import("pages/LoginPage.vue"),
       },
       {
+        path: "/cadastro",
+        name: "cadastro",
+        component: () => import("src/pages/CadastroPage.vue"),
+      },
+      {
+        path: "/esqueci-senha",
+        name: "esqueci-senha",
+        component: () => import("src/pages/EsqueciSenhaPage.vue"),
+      },
+      {
         path: "/faleconosco",
-        name: "faleConoscoPage",
-        component: () => import("pages/faleConosco.vue"),
+        name: "faleConosco",
+        component: () => import("src/pages/FaleConoscoPage.vue"),
       },
     ],
   },

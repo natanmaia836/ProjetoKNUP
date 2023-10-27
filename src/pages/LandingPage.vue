@@ -1,5 +1,5 @@
 <template>
-  <q-page style="background-color: bisque">
+  <q-page>
     <div class="row column">
       <div class="col text-center">
         <h5 style="font-weight: bold; box-shadow: ">
@@ -18,6 +18,6 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: "IndexPage",
+  name: "LandingPage",
 });
 </script>

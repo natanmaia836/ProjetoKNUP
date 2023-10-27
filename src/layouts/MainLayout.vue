@@ -1,9 +1,11 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <div class="q-pa-sm" style="background-color: bisque">
-      <q-toolbar class="bg-brown text-orange shadow-2 rounded-borders">
-        <q-btn flat icon="home" href="/"
-          ><p style="color: orange"><b style="color: white">KN</b>UP</p></q-btn
+    <q-header elevated>
+      <q-toolbar class="bg-dark">
+        <q-btn href=""
+          ><span class="text-h3"
+            ><strong>KN</strong><strong class="text-secondary">UP</strong></span
+          ></q-btn
         >
         <q-space />
 
@@ -13,23 +15,30 @@
       -->
 
         <q-btn href="" no-caps flat label="Clientes" />
-        <q-btn href="/faleconosco" no-caps flat label="Fale Conosco" />
+        <q-btn href="faleconosco" no-caps flat label="Fale Conosco" />
         <q-btn href="" no-caps flat label="Planos" />
         <q-btn href="" no-caps flat label="Sobre nós" />
         <q-btn href="/login" no-caps flat label="Login" />
       </q-toolbar>
-    </div>
-    <q-page-container>
+    </q-header>
+
+    <q-page-container class="bg-primary">
       <router-view />
+      <ChatBot></ChatBot>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
 import { defineComponent, ref } from "vue";
+import ChatBot from "components/ChatBot.vue";
 
 export default defineComponent({
   name: "MainLayout",
+
+  components: {
+    ChatBot,
+  },
 
   setup() {
     const leftDrawerOpen = ref(false);
