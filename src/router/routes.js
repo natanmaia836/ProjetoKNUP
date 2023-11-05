@@ -24,6 +24,16 @@ const routes = [
         name: "faleConosco",
         component: () => import("src/pages/FaleConoscoPage.vue"),
       },
+      {
+        path: "/novocashback",
+        name: "novocashback",
+        component: () => import("src/pages/NovoCashBackPage.vue"),
+      },
+      {
+        path: "/clientes",
+        name: "clientes",
+        component: () => import("src/pages/ClientesPage.vue"),
+      },
     ],
   },
 

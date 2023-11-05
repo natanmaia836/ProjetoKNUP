@@ -13,8 +13,8 @@
         notice shrink property since we are placing it
         as child of QToolbar
       -->
-
-        <q-btn href="" no-caps flat label="Clientes" />
+        <q-btn href="novocashback" no-caps flat label="Novo Cashback" />
+        <q-btn href="clientes" no-caps flat label="Clientes" />
         <q-btn href="faleconosco" no-caps flat label="Fale Conosco" />
         <q-btn href="" no-caps flat label="Planos" />
         <q-btn href="" no-caps flat label="Sobre nós" />
