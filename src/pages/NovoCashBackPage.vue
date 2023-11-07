@@ -8,7 +8,7 @@
               Realize o Cashback...
             </h5>
             <h5 style="font-weight: 600" v-show="passo == 2">
-              PIN enviado via SMS para {{ celular_cli }}
+              PIN enviado via SMS para {{ form.celular_cli }}
             </h5>
             <h5 style="font-weight: 600" v-show="passo == 3">
               Para finalizar o processo...
@@ -23,11 +23,11 @@
             <p v-show="passo == 3">3. Insira o valor da compra</p>
             <p v-show="passo == 4">
               4. Parabéns!, o Cashback no valor de R$
-              <b style="color: darkgoldenrod">{{ valor_cashback }}</b> foi
-              gerado sob o valor de R$
-              <b style="color: darkgoldenrod">{{ valor_compra }}</b>
+              <b style="color: darkgoldenrod">{{ cashback }}</b> foi gerado sob
+              o valor de R$
+              <b style="color: darkgoldenrod">{{ form.valor_compra }}</b>
               para a próxima compra em até 30 dias, cliente:
-              <b style="color: darkgoldenrod">{{ celular_cli }} </b>
+              <b style="color: darkgoldenrod">{{ form.celular_cli }} </b>
             </p>
           </div>
           <div class="col-1">
@@ -36,14 +36,14 @@
               outlined
               style="font-size: large"
               hint="(XX) XXXXX-XXXX"
-              v-model="celular_cli"
+              v-model="form.celular_cli"
               mask="(##) #####-####"
             ></q-input>
             <q-input
               v-show="passo == 2"
               style="font-size: large"
               outlined
-              v-model="codigo_sms"
+              v-model="form.codigo_sms"
               mask="####"
             ></q-input>
             <q-input
@@ -51,14 +51,14 @@
               style="font-size: large"
               outlined
               label="R$"
-              v-model="valor_compra"
+              v-model="valor"
               mask="#####,##"
               reverse-fill-mask
             ></q-input>
           </div>
           <div class="col q-mt-md" v-if="passo == 1">
             <q-btn
-              :disable="celular_cli.length < 15"
+              :disable="form.celular_cli.length < 15"
               no-caps
               icon="send"
               color="orange"
@@ -69,7 +69,7 @@
           <div class="col q-mt-md q-gutter-x-md" v-if="passo == 2">
             <q-btn no-caps label="Cancelar" @click="Voltar()"></q-btn>
             <q-btn
-              :disable="codigo_sms.length < 4"
+              :disable="form.codigo_sms.length < 4"
               no-caps
               color="orange"
               label="Continuar"
@@ -79,7 +79,7 @@
           <div class="col q-mt-md q-gutter-x-md" v-if="passo == 3">
             <q-btn no-caps label="Cancelar" @click="Voltar()"></q-btn>
             <q-btn
-              :disable="codigo_sms.length < 4"
+              :disable="form.codigo_sms.length < 4"
               no-caps
               color="orange"
               label="Continuar"
@@ -122,17 +122,33 @@
 </template>
 
 <script>
-import { ref } from "vue";
-import { useQuasar, Notify } from "quasar";
+import { ref, onMounted } from "vue";
+import { useQuasar, Notify, date } from "quasar";
+import firestoreService from "src/services/FireStoreService";
 const dialogCancelar = ref(false);
 const mensagem = ref("");
-const celular_cli = ref("");
-const codigo_sms = ref("");
-const valor_compra = ref("");
-const valor_cashback = ref(0);
 const passo = ref(1);
+const valor = ref("250,00");
+const cashback = ref(0);
+const form = ref({
+  celular_cli: "",
+  codigo_sms: "1234",
+  valor_compra: 0,
+  valor_cashback: 0,
+  data_inicio: "",
+  data_fim: "",
+  local: "Loja 02 - Bresser Mooca",
+  cashback: "5%",
+  status: "Ativo",
+});
 export default {
   setup() {
+    const { salvaGenericaComID, buscarColecao } = firestoreService();
+
+    onMounted(async () => {
+      //  const result = await buscarColecao("Bonus");
+    });
+
     const Voltar = () => {
       dialogCancelar.value = true;
     };
@@ -144,22 +160,39 @@ export default {
       passo.value = 3;
       MsgSucesso("Código Verificado!");
     };
-    const Avançar3 = () => {
+    const Avançar3 = async () => {
       passo.value = 4;
       MsgSucesso("Cashback realizado!");
-      valor_cashback.value =
-        (parseFloat(valor_compra.value.replace(",", ".")) * 5) / 100;
-      valor_cashback.value = valor_cashback.value.replace(".", ",");
-      valor_compra.value = valor_compra.value.replace(".", ",");
+      form.value.valor_cashback =
+        (parseFloat(valor.value.replace(",", ".")) * 5) / 100;
+      cashback.value = form.value.valor_cashback.toString().replace(".", ",");
+      form.value.valor_compra = parseFloat(valor.value.replace(",", "."));
+      form.value.data_inicio = new Date().toLocaleDateString();
+      const dataAtual = new Date();
+      dataAtual.setDate(dataAtual.getDate() + 30);
+      form.value.data_fim = dataAtual.toLocaleDateString();
+      // const result = await salvaGenericaComID(
+      //   "Bonus",
+      //   form.value.celular_cli,
+      //   form.value
+      // );
     };
     const Cancelar = () => {
       passo.value = 1;
-      codigo_sms.value = "";
-      celular_cli.value = "";
-      mensagem.value = "";
+      valor.value = "";
+      cashback.value = 0;
+      form.value = {
+        celular_cli: "",
+        codigo_sms: "",
+        valor_compra: 0,
+        valor_cashback: 0,
+        data_inicio: "",
+        data_fim: "",
+        local: "Loja 02 - Bresser Mooca",
+        cashback: "5%",
+        status: "ativo",
+      };
       dialogCancelar.value = false;
-      valor_compra.value = 0;
-      valor_cashback.value = 0;
     };
     const MsgAtencao = () => {
       Notify.create({
@@ -184,13 +217,12 @@ export default {
       });
     };
     return {
-      celular_cli,
-      codigo_sms,
+      form,
       passo,
       dialogCancelar,
       mensagem,
-      valor_compra,
-      valor_cashback,
+      valor,
+      cashback,
       Voltar,
       Avançar1,
       Avançar2,
