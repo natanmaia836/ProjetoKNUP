@@ -41,151 +41,86 @@
           bordered
           :rows="linhas"
           :columns="colunas"
-          row-key="name"
+          v-model:pagination="pagination"
+          virtual-scroll
+          row-key="id"
           dark
           color="amber"
-        />
+        >
+          <template v-slot:body-cell-actions="props">
+            <q-td :props="props">
+              <q-btn
+                class="q-mr-sm"
+                outline
+                round
+                dense
+                color="negative"
+                icon="delete"
+                @click="cancelarCashback(props.row)"
+                ><q-tooltip>Cancelar Cashback</q-tooltip></q-btn
+              >
+            </q-td>
+          </template>
+        </q-table>
       </div>
     </div>
   </q-page>
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useQuasar, Notify } from "quasar";
+import firestoreService from "src/services/FireStoreService";
 const cli_celular = ref("");
 const pesquisav = ref(false);
 const colunas = [
   {
-    name: "name",
+    name: "id",
     required: true,
     label: "Celular",
     align: "left",
-    field: (row) => row.name,
-    format: (val) => `${val}`,
+    field: "id",
     sortable: true,
   },
   {
     name: "valor",
-    align: "center",
+    align: "left",
     label: "Valor da Compra",
     field: "valor",
     sortable: true,
   },
   {
     name: "valorCash",
+    align: "left",
     label: "Valor Cashback",
     field: "valorCash",
     sortable: true,
   },
-  { name: "data_compra", label: "Data da C.", field: "data_compra" },
-  { name: "data_fim", label: "Data Fim C.", field: "data_fim" },
-  { name: "local_compra", label: "Local de C.", field: "local_compra" },
-  { name: "cashback", label: "Cashback", field: "cashback" },
-  { name: "status", label: "Status", field: "status" },
+  {
+    name: "data_compra",
+    align: "left",
+    label: "Data da C.",
+    field: "data_compra",
+  },
+  { name: "data_fim", align: "left", label: "Data Fim C.", field: "data_fim" },
+  {
+    name: "local_compra",
+    align: "left",
+    label: "Local de C.",
+    field: "local_compra",
+  },
+  { name: "cashback", align: "center", label: "Cashback", field: "cashback" },
+  { name: "status", align: "left", label: "Status", field: "status" },
+  { name: "actions", align: "center", label: "Ações", field: "actions" },
 ];
-const linhas = [
-  {
-    name: "(11) 97627-1753",
-    valor: "R$ 120,00",
-    valorCash: "R$ 6,00",
-    data_compra: "01/11/2023",
-    data_fim: "30/11/2023",
-    local_compra: "Loja 02 - Bresser Mooca",
-    cashback: "5%",
-    status: "Ativo",
-  },
-  {
-    name: "(11) 98856-1727",
-    valor: "R$ 350,00",
-    valorCash: "R$ 17,5",
-    data_compra: "15/10/2023",
-    data_fim: "15/11/2023",
-    local_compra: "Loja 02 - Bresser Mooca",
-    cashback: "5%",
-    status: "Ativo",
-  },
-  {
-    name: "(11) 97156-7727",
-    valor: "R$ 623,00",
-    valorCash: "R$ 31,15",
-    data_compra: "01/10/2023",
-    data_fim: "31/10/2023",
-    local_compra: "Loja 02 - Bresser Mooca",
-    cashback: "5%",
-    status: "Expirado",
-  },
-  {
-    name: "(11) 98922-2727",
-    valor: "R$ 173,00",
-    valorCash: "R$ 8,65",
-    data_compra: "01/11/2023",
-    data_fim: "30/11/2023",
-    local_compra: "Loja 08 - Juiz de Fora",
-    cashback: "5%",
-    status: "Ativo",
-  },
-  {
-    name: "(11) 95716-2887",
-    valor: "R$ 63,00",
-    valorCash: "R$ 3,15",
-    data_compra: "07/09/2023",
-    data_fim: "23/10/2023",
-    local_compra: "Loja 02 - Bresser Mooca",
-    cashback: "5%",
-    status: "Expirado",
-  },
-  {
-    name: "(11) 93321-1743",
-    valor: "R$ 95,00",
-    valorCash: "R$ 4,75",
-    data_compra: "08/11/2023",
-    data_fim: "22/12/2023",
-    local_compra: "Loja 06 - Ribeirão Pires",
-    cashback: "5%",
-    status: "Utilizado",
-  },
-  {
-    name: "(11) 93688-9733",
-    valor: "R$ 105,00",
-    valorCash: "R$ 1,05",
-    data_compra: "02/11/2023",
-    data_fim: "28/12/2023",
-    local_compra: "Loja 02 - Bresser Mooca",
-    cashback: "5%",
-    status: "Ativo",
-  },
-  {
-    name: "(11) 96617-2813",
-    valor: "R$ 185,00",
-    valorCash: "R$ 9,25",
-    data_compra: "01/11/2023",
-    data_fim: "30/11/2023",
-    local_compra: "Loja 08 - Juiz de Fora",
-    cashback: "5%",
-    status: "Ativo",
-  },
-  {
-    name: "(11) 98687-8883",
-    valor: "R$ 765,00",
-    valorCash: "R$ 38,25",
-    data_compra: "05/07/2023",
-    data_fim: "25/08/2023",
-    local_compra: "Loja 08 - Juiz de Fora",
-    cashback: "5%",
-    status: "Ativo",
-  },
-  {
-    name: "(11) 92937-5853",
-    valor: "R$ 422,00",
-    valorCash: "R$ 21,10",
-    data_compra: "05/07/2023",
-    data_fim: "25/08/2023",
-    local_compra: "Loja 08 - Juiz de Fora",
-    cashback: "5%",
-    status: "Utilizado",
-  },
-];
+const linhas = ref([]);
+const pagination = ref({
+  sortBy: "desc",
+  descending: false,
+  page: 1,
+  rowsPerPage: 15,
+  // rowsNumber: xx if getting data from a server
+});
 
 const BuscarCliente = () => {
   if (cli_celular.value.length != 15) {
@@ -221,13 +156,50 @@ const MsgSucesso = (mensagem) => {
 };
 export default {
   setup() {
+    const { salvaGenericaComID, buscarColecao } = firestoreService();
+
+    onMounted(async () => {
+      linhas.value = [];
+      await metodoBuscarColecao();
+    });
+
+    const metodoBuscarColecao = async () => {
+      const result = await buscarColecao("Bonus");
+
+      if (result) {
+        await mapeamentoTabela(result);
+      }
+    };
+
+    const mapeamentoTabela = async (resultado) => {
+      resultado.forEach((item) => {
+        let itemLinha = {
+          id: item.celular_cli,
+          valor: item.valor_compra,
+          valorCash: item.valor_cashback,
+          data_compra: item.data_inicio,
+          data_fim: item.data_fim,
+          local_compra: item.local,
+          cashback: item.cashback,
+          status: item.status,
+        };
+        linhas.value.push(itemLinha);
+      });
+    };
+
+    const cancelarCashback = () => {
+      console.log("ai cancelou");
+    };
     return {
       colunas,
       linhas,
       cli_celular,
       pesquisav,
+      pagination,
       BuscarCliente,
       limparBusca,
+      cancelarCashback,
+      metodoBuscarColecao,
     };
   },
 };
