@@ -56,7 +56,7 @@
                 dense
                 color="negative"
                 icon="delete"
-                @click="cancelarCashback(props.row)"
+                @click="metodoPerguntaSeCancelaCashback(props.row)"
                 ><q-tooltip>Cancelar Cashback</q-tooltip></q-btn
               >
             </q-td>
@@ -69,17 +69,18 @@
 
 <script>
 import { ref, onMounted } from "vue";
-import { useQuasar, Notify } from "quasar";
+import { useQuasar, Notify, QDialog } from "quasar";
 import firestoreService from "src/services/FireStoreService";
+const $q = useQuasar();
 const cli_celular = ref("");
 const pesquisav = ref(false);
 const colunas = [
   {
-    name: "id",
+    name: "celular",
     required: true,
     label: "Celular",
     align: "left",
-    field: "id",
+    field: "celular",
     sortable: true,
   },
   {
@@ -156,12 +157,15 @@ const MsgSucesso = (mensagem) => {
 };
 export default {
   setup() {
-    const { salvaGenericaComID, buscarColecao } = firestoreService();
+    const { salvaGenericaComID, buscarColecao, excluiDocumentoComID } =
+      firestoreService();
 
     onMounted(async () => {
       linhas.value = [];
       await metodoBuscarColecao();
     });
+
+    const $q = useQuasar();
 
     const metodoBuscarColecao = async () => {
       const result = await buscarColecao("Bonus");
@@ -174,7 +178,8 @@ export default {
     const mapeamentoTabela = async (resultado) => {
       resultado.forEach((item) => {
         let itemLinha = {
-          id: item.celular_cli,
+          id: item.id,
+          celular: item.celular_cli,
           valor: item.valor_compra,
           valorCash: item.valor_cashback,
           data_compra: item.data_inicio,
@@ -187,8 +192,49 @@ export default {
       });
     };
 
-    const cancelarCashback = () => {
-      console.log("ai cancelou");
+    const metodoPerguntaSeCancelaCashback = (linha) => {
+      $q.dialog({
+        title: "Cancelar Cashback",
+        message: `Deseja cancelar o cashback do cliente ${linha.celular} ?`,
+        cancel: true,
+        persistent: true,
+      }).onOk(async () => {
+        await cancelarCashback(linha.id);
+      });
+    };
+
+    const cancelarCashback = async (linhaID) => {
+      const result = await excluiDocumentoComID("Bonus", linhaID);
+      if (result) {
+        MsgSucesso("Cashback cancelado!");
+        linhas.value = [];
+        await metodoBuscarColecao();
+      } else {
+        MsgAtencao("Não foi possível Cancelar cashback!");
+      }
+    };
+
+    const MsgAtencao = () => {
+      Notify.create({
+        icon: "announcement",
+        type: "warning",
+        multiLine: true,
+        progress: true,
+        html: true,
+        position: "top",
+        message: "Selecione o tipo de pagamento!",
+      });
+    };
+    const MsgSucesso = (mensagem) => {
+      Notify.create({
+        icon: "announcement",
+        type: "positive",
+        progress: true,
+        multiLine: true,
+        html: true,
+        position: "top",
+        message: mensagem,
+      });
     };
     return {
       colunas,
@@ -200,6 +246,9 @@ export default {
       limparBusca,
       cancelarCashback,
       metodoBuscarColecao,
+      metodoPerguntaSeCancelaCashback,
+      MsgAtencao,
+      MsgSucesso,
     };
   },
 };

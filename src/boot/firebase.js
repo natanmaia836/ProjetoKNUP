@@ -8,6 +8,7 @@ import {
   getDocs,
   setDoc,
   addDoc,
+  deleteDoc,
   deleteField,
   collection,
   query,
@@ -63,6 +64,7 @@ export {
   where,
   onSnapshot,
   serverTimestamp,
+  deleteDoc,
 };
 
 export default boot(async (/*{ db, setDoc }*/) => {

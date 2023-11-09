@@ -131,6 +131,7 @@ const passo = ref(1);
 const valor = ref("250,00");
 const cashback = ref(0);
 const form = ref({
+  id: "",
   celular_cli: "",
   codigo_sms: "1234",
   valor_compra: 0,
@@ -143,7 +144,7 @@ const form = ref({
 });
 export default {
   setup() {
-    const { salvaGenericaComID, buscarColecao } = firestoreService();
+    const { salvaGenericaSemID, buscarColecao } = firestoreService();
 
     onMounted(async () => {
       //  const result = await buscarColecao("Bonus");
@@ -163,19 +164,17 @@ export default {
     const Avançar3 = async () => {
       passo.value = 4;
       MsgSucesso("Cashback realizado!");
-      form.value.valor_cashback =
-        (parseFloat(valor.value.replace(",", ".")) * 5) / 100;
-      cashback.value = form.value.valor_cashback.toString().replace(".", ",");
+      cashback.value = (parseFloat(valor.value.replace(",", ".")) * 5) / 100;
+      form.value.valor_cashback = Math.round(cashback.value * 100) / 100;
+      form.value.valor_cashback = form.value.valor_cashback
+        .toString()
+        .replace(".", ",");
       form.value.valor_compra = parseFloat(valor.value.replace(",", "."));
       form.value.data_inicio = new Date().toLocaleDateString();
       const dataAtual = new Date();
       dataAtual.setDate(dataAtual.getDate() + 30);
       form.value.data_fim = dataAtual.toLocaleDateString();
-      // const result = await salvaGenericaComID(
-      //   "Bonus",
-      //   form.value.celular_cli,
-      //   form.value
-      // );
+      const result = await salvaGenericaSemID("Bonus", form.value);
     };
     const Cancelar = () => {
       passo.value = 1;

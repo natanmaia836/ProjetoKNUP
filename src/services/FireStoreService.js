@@ -5,6 +5,7 @@ import {
   getDoc,
   getDocs,
   collection,
+  deleteDoc,
   setDoc,
   query,
   where,
@@ -79,10 +80,11 @@ export default function firestoreService() {
     try {
       MsgOcupado(true);
       const docRef = doc(collection(db, colecao));
+      form.id = docRef.id;
       await setDoc(docRef, form);
       MsgOcupado(false);
       //console.log(docRef);
-      return docRef.id;
+      return docRef;
     } catch (error) {
       console.log(error);
       MsgOcupado(false);
@@ -127,6 +129,21 @@ export default function firestoreService() {
       throw error;
     }
   };
+  const excluiDocumentoComID = async (colecao, docID) => {
+    try {
+      MsgOcupado(true);
+      const docRef = doc(db, colecao, docID);
+
+      await deleteDoc(docRef); // Use o método deleteDoc para excluir o documento
+
+      MsgOcupado(false);
+      return "Documento excluído com sucesso!";
+    } catch (error) {
+      console.error(error);
+      MsgOcupado(false);
+      MsgErro("Erro ao excluir o documento. Informe a administração.");
+    }
+  };
 
   return {
     buscaTransacoesRealTime,
@@ -135,5 +152,6 @@ export default function firestoreService() {
     salvaGenericaSemID,
     salvaGenericaComID,
     buscarColecao,
+    excluiDocumentoComID,
   };
 }
