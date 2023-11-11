@@ -63,17 +63,10 @@
                 outline
                 round
                 dense
-<<<<<<< HEAD
                 color="negative"
                 icon="delete"
                 @click="metodoPerguntaSeCancelaCashback(props.row)"
                 ><q-tooltip>Cancelar Cashback</q-tooltip></q-btn
-=======
-                color="amber"
-                icon="edit_note"
-                @click="metodoPerguntaSeEditaCashback(props.row)"
-                ><q-tooltip>Editar Celular</q-tooltip></q-btn
->>>>>>> a6928191f01ea7d846cd0002e687a7fb0522b71e
               >
               <q-btn
                 class="q-mr-sm"
