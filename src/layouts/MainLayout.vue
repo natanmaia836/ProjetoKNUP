@@ -17,7 +17,7 @@
         <q-btn href="clientes" no-caps flat label="Clientes" />
         <q-btn href="faleconosco" no-caps flat label="Fale Conosco" />
         <q-btn href="" no-caps flat label="Planos" />
-        <q-btn href="" no-caps flat label="Sobre nós" />
+        <q-btn href="sobrenos" no-caps flat label="Sobre nós" />
         <q-btn href="login" no-caps flat label="Login" />
       </q-toolbar>
     </q-header>

@@ -59,6 +59,16 @@
                 @click="metodoPerguntaSeCancelaCashback(props.row)"
                 ><q-tooltip>Cancelar Cashback</q-tooltip></q-btn
               >
+              <q-btn
+                class="q-mr-sm"
+                outline
+                round
+                dense
+                color="negative"
+                icon="delete"
+                @click="metodoPerguntaSeCancelaCashback(props.row)"
+                ><q-tooltip>Cancelar Cashback</q-tooltip></q-btn
+              >
             </q-td>
           </template>
         </q-table>
