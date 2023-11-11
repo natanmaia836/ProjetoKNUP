@@ -1,10 +1,19 @@
 <template>
   <q-page class="q-pa-sm">
-    <h5><q-icon class="q-mb-sm" name="person"></q-icon>Clientes</h5>
+    <h5
+      style="
+        text-decoration: underline;
+        font-weight: bold;
+        border-bottom: solid 2px black;
+      "
+    >
+      <q-icon size="md" name="person"></q-icon>Clientes
+    </h5>
     <div class="row">
       <q-card>
         <q-input
-          style="color: whitesmoke"
+          class="bg-dark"
+          dark
           outlined
           label="Celular"
           v-model="cli_celular"
@@ -33,8 +42,8 @@
         </q-input>
       </q-card>
     </div>
-    <hr />
-    <div class="row">
+
+    <div class="row q-mt-md">
       <div class="col">
         <q-table
           flat
@@ -50,45 +59,95 @@
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
               <q-btn
-                class="q-mr-sm"
+                class="q-ml-sm q-mr-sm"
                 outline
                 round
                 dense
+<<<<<<< HEAD
                 color="negative"
                 icon="delete"
                 @click="metodoPerguntaSeCancelaCashback(props.row)"
                 ><q-tooltip>Cancelar Cashback</q-tooltip></q-btn
+=======
+                color="amber"
+                icon="edit_note"
+                @click="metodoPerguntaSeEditaCashback(props.row)"
+                ><q-tooltip>Editar Celular</q-tooltip></q-btn
+>>>>>>> a6928191f01ea7d846cd0002e687a7fb0522b71e
               >
               <q-btn
                 class="q-mr-sm"
                 outline
                 round
                 dense
-                color="negative"
-                icon="delete"
-                @click="metodoPerguntaSeCancelaCashback(props.row)"
-                ><q-tooltip>Cancelar Cashback</q-tooltip></q-btn
+                color="amber"
+                icon="edit_note"
+                @click="metodoPerguntaSeEditaCashback(props.row)"
+                ><q-tooltip>Editar Celular</q-tooltip></q-btn
               >
             </q-td>
           </template>
         </q-table>
       </div>
     </div>
+    <q-dialog v-model="dialogEditar">
+      <q-card class="q-pa-md bg-dark">
+        <div class="row justify-center">
+          <h5 style="color: white">Editar - Número de Celular</h5>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <q-input
+              dark
+              outlined
+              label="Celular"
+              style="font-size: medium"
+              v-model="celularEditar"
+              mask="(##) #####-####"
+            ></q-input>
+          </div>
+        </div>
+        <div class="row text-center q-col-gutter-x-md q-mt-md">
+          <div class="col">
+            <q-btn
+              class="full-width"
+              no-caps
+              outline
+              color="white"
+              label="Cancelar"
+              @click="cancelarEdicao()"
+            ></q-btn>
+          </div>
+          <div class="col">
+            <q-btn
+              :disable="celularEditar.length < 15"
+              class="full-width"
+              no-caps
+              color="orange"
+              label="Editar"
+              @click="metodoEditarCashback()"
+            ></q-btn>
+          </div>
+        </div>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script>
 import { ref, onMounted } from "vue";
-import { useQuasar, Notify, QDialog } from "quasar";
+import { useQuasar, Notify, QDialog, Dark } from "quasar";
 import firestoreService from "src/services/FireStoreService";
 const $q = useQuasar();
 const cli_celular = ref("");
+const celularEditar = ref("");
+const dialogEditar = ref(false);
 const pesquisav = ref(false);
 const colunas = [
   {
     name: "celular",
     required: true,
-    label: "Celular",
+    label: "Clientes",
     align: "left",
     field: "celular",
     sortable: true,
@@ -124,6 +183,7 @@ const colunas = [
   { name: "status", align: "left", label: "Status", field: "status" },
   { name: "actions", align: "center", label: "Ações", field: "actions" },
 ];
+const linha = ref(null);
 const linhas = ref([]);
 const pagination = ref({
   sortBy: "desc",
@@ -133,77 +193,86 @@ const pagination = ref({
   // rowsNumber: xx if getting data from a server
 });
 
-const BuscarCliente = () => {
-  if (cli_celular.value.length != 15) {
-    pesquisav.value = false;
-    MsgAtencao("Celular inválido ou incorreto!");
-  } else {
-    pesquisav.value = true;
-    MsgSucesso("Busca realizada!");
-  }
-};
-const limparBusca = () => {};
-const MsgAtencao = (mensagem) => {
-  Notify.create({
-    icon: "announcement",
-    type: "warning",
-    multiLine: true,
-    progress: true,
-    html: true,
-    position: "top",
-    message: mensagem,
-  });
-};
-const MsgSucesso = (mensagem) => {
-  Notify.create({
-    icon: "announcement",
-    type: "positive",
-    progress: true,
-    multiLine: true,
-    html: true,
-    position: "top",
-    message: mensagem,
-  });
-};
 export default {
   setup() {
-    const { salvaGenericaComID, buscarColecao, excluiDocumentoComID } =
+    const { atualizarParametroDocumento, buscarColecao, excluiDocumentoComID } =
       firestoreService();
 
     onMounted(async () => {
-      linhas.value = [];
-      await metodoBuscarColecao();
+      await metodoBuscarColecao("Todos");
     });
 
     const $q = useQuasar();
 
-    const metodoBuscarColecao = async () => {
+    // Busca
+    const metodoBuscarColecao = async (tipoDeBusca) => {
+      linhas.value = [];
       const result = await buscarColecao("Bonus");
 
       if (result) {
-        await mapeamentoTabela(result);
+        await mapeamentoTabela(result, tipoDeBusca);
       }
     };
+    const mapeamentoTabela = async (resultado, tipoDeBusca) => {
+      if (tipoDeBusca == "Todos") {
+        resultado.forEach((item) => {
+          let itemLinha = {
+            id: item.id,
+            celular: item.celular_cli,
+            valor: item.valor_compra,
+            valorCash: item.valor_cashback,
+            data_compra: item.data_inicio,
+            data_fim: item.data_fim,
+            local_compra: item.local,
+            cashback: item.cashback,
+            status: item.status,
+          };
+          linhas.value.push(itemLinha);
+        });
+        if (linhas.value.length == 0 || !linhas.value)
+          MsgAtencao("Não há clientes!");
+      } else {
+        resultado.forEach((item) => {
+          if (cli_celular.value == item.celular_cli) {
+            let itemLinha = {
+              id: item.id,
+              celular: item.celular_cli,
+              valor: item.valor_compra,
+              valorCash: item.valor_cashback,
+              data_compra: item.data_inicio,
+              data_fim: item.data_fim,
+              local_compra: item.local,
+              cashback: item.cashback,
+              status: item.status,
+            };
+            linhas.value.push(itemLinha);
+          }
+        });
 
-    const mapeamentoTabela = async (resultado) => {
-      resultado.forEach((item) => {
-        let itemLinha = {
-          id: item.id,
-          celular: item.celular_cli,
-          valor: item.valor_compra,
-          valorCash: item.valor_cashback,
-          data_compra: item.data_inicio,
-          data_fim: item.data_fim,
-          local_compra: item.local,
-          cashback: item.cashback,
-          status: item.status,
-        };
-        linhas.value.push(itemLinha);
-      });
+        if (linhas.value.length == 0 || !linhas.value)
+          MsgAtencao("Cliente não encontrado!");
+      }
+    };
+    const BuscarCliente = async () => {
+      if (cli_celular.value.length != 15) {
+        pesquisav.value = false;
+        MsgAtencao("Celular inválido ou incorreto!");
+      } else {
+        pesquisav.value = true;
+        MsgSucesso("Busca realizada!");
+        await metodoBuscarColecao("clienteUnico");
+      }
+    };
+    const limparBusca = async () => {
+      cli_celular.value = "";
+      pesquisav.value = false;
+      await metodoBuscarColecao("Todos");
     };
 
+    // Exclusão
     const metodoPerguntaSeCancelaCashback = (linha) => {
       $q.dialog({
+        dark: true,
         title: "Cancelar Cashback",
         message: `Deseja cancelar o cashback do cliente ${linha.celular} ?`,
         cancel: true,
@@ -212,19 +281,45 @@ export default {
         await cancelarCashback(linha.id);
       });
     };
-
     const cancelarCashback = async (linhaID) => {
       const result = await excluiDocumentoComID("Bonus", linhaID);
       if (result) {
         MsgSucesso("Cashback cancelado!");
-        linhas.value = [];
-        await metodoBuscarColecao();
+        await metodoBuscarColecao("Todos");
       } else {
         MsgAtencao("Não foi possível Cancelar cashback!");
       }
     };
 
-    const MsgAtencao = () => {
+    // Edição
+    const metodoPerguntaSeEditaCashback = async (linhaTab) => {
+      linha.value = linhaTab;
+      dialogEditar.value = true;
+    };
+    const metodoEditarCashback = async () => {
+      const result = await atualizarParametroDocumento(
+        "Bonus",
+        linha.value.id,
+        "celular_cli",
+        celularEditar.value
+      );
+      console.log(result);
+      if (result) {
+        dialogEditar.value = false;
+        MsgSucesso("Edição realizada!");
+        await metodoBuscarColecao("Todos");
+      } else {
+        MsgAtencao("Não foi possível editar cashback!");
+      }
+    };
+    const cancelarEdicao = () => {
+      dialogEditar.value = false;
+      celularEditar.value = "";
+      linha.value = null;
+    };
+
+    //Métodos Auxiliares
+    const MsgAtencao = (mensagem) => {
       Notify.create({
         icon: "announcement",
         type: "warning",
@@ -232,7 +327,7 @@ export default {
         progress: true,
         html: true,
         position: "top",
-        message: "Selecione o tipo de pagamento!",
+        message: mensagem,
       });
     };
     const MsgSucesso = (mensagem) => {
@@ -246,17 +341,24 @@ export default {
         message: mensagem,
       });
     };
+
     return {
       colunas,
       linhas,
+      linha,
       cli_celular,
+      celularEditar,
       pesquisav,
       pagination,
+      dialogEditar,
       BuscarCliente,
       limparBusca,
       cancelarCashback,
       metodoBuscarColecao,
       metodoPerguntaSeCancelaCashback,
+      metodoPerguntaSeEditaCashback,
+      metodoEditarCashback,
+      cancelarEdicao,
       MsgAtencao,
       MsgSucesso,
     };
