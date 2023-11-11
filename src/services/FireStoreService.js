@@ -144,7 +144,43 @@ export default function firestoreService() {
       MsgErro("Erro ao excluir o documento. Informe a administração.");
     }
   };
+  const atualizarParametroDocumento = async (colecao, docID, parametro, novoValor) => {
+    try {
+      MsgOcupado(true);
 
+      const docRef = doc(db, colecao, docID);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        // Obtenha os dados atuais do documento
+        const dadosAtuais = docSnap.data();
+
+        // Verifique se o parâmetro existe no documento
+        if (dadosAtuais[parametro] !== undefined) {
+          // Atualize o valor do parâmetro
+          dadosAtuais[parametro] = novoValor;
+
+          // Atualize o documento no Firestore
+          await setDoc(docRef, dadosAtuais);
+
+          MsgOcupado(false);
+          return { sucesso: true, mensagem: 'Parâmetro atualizado com sucesso.' };
+        } else {
+          MsgOcupado(false);
+          return { sucesso: false, mensagem: 'O parâmetro especificado não existe no documento.' };
+        }
+      } else {
+        MsgOcupado(false);
+        return { sucesso: false, mensagem: 'Documento não encontrado.' };
+      }
+    } catch (error) {
+      console.log(error);
+      MsgErro("Erro na atualização do parâmetro do documento.");
+      return { sucesso: false, mensagem: 'Erro na atualização do parâmetro do documento.' };
+    } finally {
+      MsgOcupado(false);
+    }
+  };
   return {
     buscaTransacoesRealTime,
     buscaGenericaPorIDRealTime,
@@ -153,5 +189,6 @@ export default function firestoreService() {
     salvaGenericaComID,
     buscarColecao,
     excluiDocumentoComID,
+    atualizarParametroDocumento,
   };
 }
