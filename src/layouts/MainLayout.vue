@@ -34,7 +34,7 @@
           class="q-ma-md botao-voltar"
           color="secondary"
           text-color="black"
-          style="bottom: 11%; right: 0.2vw"
+          style="bottom: calc(8% + 16px); right: calc(0.1vw + 0.1px)"
         >
           <q-tooltip
             class="bg-dark"
@@ -99,7 +99,7 @@ export default defineComponent({
   position: fixed;
   bottom: -50px; /* Começa abaixo da tela */
   right: 16px;
-  transition: bottom 50s ease-in-out; /* Ajuste a duração e a função de timing */
+  transition: bottom 0.5s ease-in-out; /* Ajuste a duração e a função de timing */
 }
 
 .botao-voltar.mostrar {
