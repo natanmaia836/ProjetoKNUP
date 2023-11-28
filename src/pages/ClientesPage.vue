@@ -131,72 +131,108 @@
 import { ref, onMounted } from "vue";
 import { useQuasar, Notify, QDialog, Dark } from "quasar";
 import firestoreService from "src/services/FireStoreService";
-const $q = useQuasar();
-const cli_celular = ref("");
-const celularEditar = ref("");
-const dialogEditar = ref(false);
-const pesquisav = ref(false);
-const colunas = [
-  {
-    name: "celular",
-    required: true,
-    label: "Clientes",
-    align: "left",
-    field: "celular",
-    sortable: true,
-  },
-  {
-    name: "valor",
-    align: "left",
-    label: "Valor da Compra",
-    field: "valor",
-    sortable: true,
-  },
-  {
-    name: "valorCash",
-    align: "left",
-    label: "Valor Cashback",
-    field: "valorCash",
-    sortable: true,
-  },
-  {
-    name: "data_compra",
-    align: "left",
-    label: "Data da C.",
-    field: "data_compra",
-  },
-  { name: "data_fim", align: "left", label: "Data Fim C.", field: "data_fim" },
-  {
-    name: "local_compra",
-    align: "left",
-    label: "Local de C.",
-    field: "local_compra",
-  },
-  { name: "cashback", align: "center", label: "Cashback", field: "cashback" },
-  { name: "status", align: "left", label: "Status", field: "status" },
-  { name: "actions", align: "center", label: "Ações", field: "actions" },
-];
-const linha = ref(null);
-const linhas = ref([]);
-const pagination = ref({
-  sortBy: "desc",
-  descending: false,
-  page: 1,
-  rowsPerPage: 15,
-  // rowsNumber: xx if getting data from a server
-});
+import { useRouter } from "vue-router";
 
 export default {
   setup() {
+    const router = useRouter();
+    const $q = useQuasar();
+    const cli_celular = ref("");
+    const celularEditar = ref("");
+    const dialogEditar = ref(false);
+    const pesquisav = ref(false);
+    const colunas = [
+      {
+        name: "celular",
+        required: true,
+        label: "Clientes",
+        align: "left",
+        field: "celular",
+        sortable: true,
+      },
+      {
+        name: "valor",
+        align: "left",
+        label: "Valor da Compra",
+        field: "valor",
+        sortable: true,
+      },
+      {
+        name: "valorCash",
+        align: "left",
+        label: "Valor Cashback",
+        field: "valorCash",
+        sortable: true,
+      },
+      {
+        name: "data_compra",
+        align: "left",
+        label: "Data da C.",
+        field: "data_compra",
+      },
+      {
+        name: "data_fim",
+        align: "left",
+        label: "Data Fim C.",
+        field: "data_fim",
+      },
+      {
+        name: "local_compra",
+        align: "left",
+        label: "Local de C.",
+        field: "local_compra",
+      },
+      {
+        name: "cashback",
+        align: "center",
+        label: "Cashback",
+        field: "cashback",
+      },
+      { name: "status", align: "left", label: "Status", field: "status" },
+      { name: "actions", align: "center", label: "Ações", field: "actions" },
+    ];
+    const linha = ref(null);
+    const linhas = ref([]);
+    const pagination = ref({
+      sortBy: "desc",
+      descending: false,
+      page: 1,
+      rowsPerPage: 15,
+      // rowsNumber: xx if getting data from a server
+    });
     const { atualizarParametroDocumento, buscarColecao, excluiDocumentoComID } =
       firestoreService();
 
     onMounted(async () => {
+      let usuario = getUsuario();
+      if (!usuario) {
+        moveToLoginPage();
+      }
+
       await metodoBuscarColecao("Todos");
     });
 
-    const $q = useQuasar();
-
+    const getUsuario = () => {
+      const result = JSON.parse(
+        window.localStorage.getItem("Usuario_administrador")
+      );
+      if (result) {
+        return result;
+      } else {
+        const result2 = JSON.parse(
+          window.localStorage.getItem("Usuario_padrao")
+        );
+        if (result2) {
+          return result2;
+        }
+      }
+    };
+    const moveToLoginPage = () => {
+      // console.log(linha);
+      let move_To = "";
+      move_To = "/login";
+      router.push(move_To);
+    };
     // Busca
     const metodoBuscarColecao = async (tipoDeBusca) => {
       linhas.value = [];

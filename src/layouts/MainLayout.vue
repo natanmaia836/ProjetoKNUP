@@ -13,12 +13,42 @@
         notice shrink property since we are placing it
         as child of QToolbar
       -->
-        <q-btn href="novocashback" no-caps flat label="Novo Cashback" />
-        <q-btn href="clientes" no-caps flat label="Clientes" />
+        <q-btn href="" no-caps flat icon="home" color="amber"
+          ><q-tooltip>Home</q-tooltip></q-btn
+        >
+        <q-btn
+          href="novocashback"
+          no-caps
+          flat
+          label="Novo Cashback"
+          v-if="loginv == true"
+        />
+        <q-btn
+          href="clientes"
+          no-caps
+          flat
+          label="Clientes"
+          v-if="loginv == true"
+        />
         <q-btn href="faleconosco" no-caps flat label="Fale Conosco" />
-        <q-btn href="" no-caps flat label="Planos" />
         <q-btn href="sobrenos" no-caps flat label="Sobre nós" />
-        <q-btn href="login" no-caps flat label="Login" />
+        <q-btn href="login" no-caps flat label="Login" v-if="loginv == false" />
+        <q-btn
+          href="cadastro"
+          no-caps
+          flat
+          label="Cadastrar"
+          v-if="permissaoAdministrador == true && loginv == true"
+        />
+        <q-btn
+          v-if="loginv == true"
+          round
+          icon="logout"
+          color="secondary"
+          @click="fazerLogout()"
+        >
+          <q-tooltip>Desconectar</q-tooltip>
+        </q-btn>
       </q-toolbar>
     </q-header>
 
@@ -52,8 +82,9 @@
 
 <script>
 import { defineComponent, ref, onMounted, onBeforeUnmount } from "vue";
+import firestoreService from "src/services/FireStoreService";
 import ChatBot from "components/ChatBot.vue";
-
+import { useRouter } from "vue-router";
 export default defineComponent({
   name: "MainLayout",
 
@@ -62,10 +93,53 @@ export default defineComponent({
   },
 
   setup() {
+    const { buscarColecao } = firestoreService();
+    const router = useRouter();
+    const permissaoAdministrador = ref(false);
+    const loginv = ref(false);
     const leftDrawerOpen = ref(false);
 
     const mostrarBotao = ref(false);
 
+    onMounted(async () => {
+      await metodoVerificaSeEstaLogado();
+    });
+
+    const metodoVerificaSeEstaLogado = async () => {
+      loginv.value = false;
+      permissaoAdministrador.value = false;
+      const result = getUsuario();
+      if (result) {
+        const resultado = await buscarColecao("Usuarios");
+        if (resultado) {
+          resultado.forEach((user) => {
+            if (result.id == user.id) {
+              loginv.value = true;
+              if (result.usuario == "admin") {
+                permissaoAdministrador.value = true;
+              }
+            }
+          });
+        }
+      }
+      //console.log(result);
+    };
+
+    const getUsuario = () => {
+      const result = JSON.parse(
+        window.localStorage.getItem("Usuario_administrador")
+      );
+      if (result) {
+        return result;
+      } else {
+        const result2 = JSON.parse(
+          window.localStorage.getItem("Usuario_padrao")
+        );
+        if (result2) {
+          return result2;
+        }
+      }
+    };
     // Mostra ou oculta o botão com base na posição da página
     const verificarMostrarBotao = () => {
       mostrarBotao.value = window.scrollY > 100;
@@ -80,16 +154,37 @@ export default defineComponent({
     };
 
     // Adiciona um ouvinte de rolagem quando o componente é montado
-    onMounted(() => {
-      window.addEventListener("scroll", verificarMostrarBotao);
-    });
 
     // Remove o ouvinte de rolagem quando o componente é desmontado
     onBeforeUnmount(() => {
       window.removeEventListener("scroll", verificarMostrarBotao);
     });
+    const fazerLogout = async () => {
+      let usuario = await getUsuario();
+      if (usuario.usuario == "admin") {
+        window.localStorage.removeItem("Usuario_administrador");
+      } else {
+        window.localStorage.removeItem("Usuario_padrao");
+      }
+      refreshPage();
+    };
+    const moveToLoginPage = () => {
+      // console.log(linha);
+      let move_To = "";
+      move_To = "/login";
+      router.push(move_To);
+    };
+    const refreshPage = () => {
+      location.reload();
+    };
 
-    return { mostrarBotao, scrollToTop };
+    return {
+      mostrarBotao,
+      scrollToTop,
+      fazerLogout,
+      permissaoAdministrador,
+      loginv,
+    };
   },
 });
 </script>

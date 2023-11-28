@@ -15,7 +15,7 @@
             rounded
             outlined
             bg-color="white"
-            v-model="usuario"
+            v-model="form.usuario"
           ></q-input>
           <div><span class="text-subtitle1">E-mail</span></div>
           <q-input
@@ -23,20 +23,26 @@
             rounded
             outlined
             bg-color="white"
-            v-model="email"
+            v-model="form.email"
           ></q-input>
           <div><span class="text-subtitle1">Senha</span></div>
           <q-input
+            type="password"
             dense
             rounded
             outlined
             bg-color="white"
-            v-model="senha"
+            v-model="form.senha"
           ></q-input>
         </q-card-section>
 
         <q-card-actions class="flex flex-center"
-          ><q-btn rounded color="secondary" text-color="dark" padding="sm lg"
+          ><q-btn
+            @click="cadastrarNovoUsuario()"
+            rounded
+            color="secondary"
+            text-color="dark"
+            padding="sm lg"
             ><strong>Cadastrar</strong></q-btn
           ></q-card-actions
         >
@@ -46,20 +52,63 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
+import firestoreService from "src/services/FireStoreService";
+import { MsgAtencao, MsgSucesso } from "src/util/useMsg";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
   name: "CadastroPage",
 
   setup() {
+    const { salvaGenericaSemID } = firestoreService();
+    const router = useRouter();
     const form = ref({
       usuario: "",
       email: "",
       senha: "",
     });
+    onMounted(() => {
+      let usuario = getUsuario();
+      if (!usuario) {
+        moveToLoginPage();
+      }
+    });
+    const getUsuario = () => {
+      const result = JSON.parse(
+        window.localStorage.getItem("Usuario_administrador")
+      );
+      if (result) {
+        return result;
+      } else {
+        const result2 = JSON.parse(
+          window.localStorage.getItem("Usuario_padrao")
+        );
+        if (result2) {
+          return result2;
+        }
+      }
+    };
 
+    const cadastrarNovoUsuario = async () => {
+      const result = await salvaGenericaSemID("Usuarios", form.value);
+      if (result) {
+        MsgSucesso("Usuário Cadastrado!");
+        moveToLoginPage();
+      } else {
+        MsgAtencao("Não foi possível realizar o cadastro!");
+        return;
+      }
+    };
+    const moveToLoginPage = () => {
+      // console.log(linha);
+      let move_To = "";
+      move_To = "/login";
+      router.push(move_To);
+    };
     return {
       form,
+      cadastrarNovoUsuario,
     };
   },
 });

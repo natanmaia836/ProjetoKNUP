@@ -142,11 +142,11 @@
     <div class="row q-mt-xl">
       <div class="col q-gutter-md">
         <div class="row justify-center text-secondary texto">
-          <q-div class="col-md-12"
-            ><q-card class="bg-black text-center card q-pa-md">
+          <div class="col-md-12">
+            <q-card class="bg-black text-center card q-pa-md">
               <span class="text-h3">Planos</span></q-card
-            ></q-div
-          >
+            >
+          </div>
         </div>
 
         <div class="row justify-center q-gutter-md">

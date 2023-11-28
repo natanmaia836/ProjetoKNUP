@@ -36,6 +36,7 @@
               v-show="passo == 1"
               outlined
               style="font-size: large"
+              input-style="text-align: center"
               hint="(XX) XXXXX-XXXX"
               v-model="form.celular_cli"
               mask="(##) #####-####"
@@ -44,6 +45,7 @@
               dark
               v-show="passo == 2"
               style="font-size: large"
+              input-style="text-align: center"
               outlined
               v-model="form.codigo_sms"
               mask="####"
@@ -52,6 +54,7 @@
               dark
               v-show="passo == 3"
               style="font-size: large"
+              input-style="text-align: center"
               outlined
               label="R$"
               v-model="valor"
@@ -135,31 +138,57 @@
 import { ref, onMounted } from "vue";
 import { useQuasar, Notify, date } from "quasar";
 import firestoreService from "src/services/FireStoreService";
-const dialogCancelar = ref(false);
-const mensagem = ref("");
-const passo = ref(1);
-const valor = ref("");
-const cashback = ref(0);
-const form = ref({
-  id: "",
-  celular_cli: "",
-  codigo_sms: "",
-  valor_compra: 0,
-  valor_cashback: 0,
-  data_inicio: "",
-  data_fim: "",
-  local: "Loja 02 - Bresser Mooca",
-  cashback: "5%",
-  status: "Ativo",
-});
+import { useRouter } from "vue-router";
 export default {
   setup() {
+    const router = useRouter();
+    const dialogCancelar = ref(false);
+    const mensagem = ref("");
+    const passo = ref(1);
+    const valor = ref("");
+    const cashback = ref(0);
+    const form = ref({
+      id: "",
+      celular_cli: "",
+      codigo_sms: "",
+      valor_compra: 0,
+      valor_cashback: 0,
+      data_inicio: "",
+      data_fim: "",
+      local: "Loja 02 - Bresser Mooca",
+      cashback: "5%",
+      status: "Ativo",
+    });
     const { salvaGenericaSemID } = firestoreService();
 
-    // onMounted(async () => {
-    //   //  const result = await buscarColecao("Bonus");
-    // });
+    onMounted(async () => {
+      let usuario = getUsuario();
+      if (!usuario) {
+        moveToLoginPage();
+      }
+    });
 
+    const getUsuario = () => {
+      const result = JSON.parse(
+        window.localStorage.getItem("Usuario_administrador")
+      );
+      if (result) {
+        return result;
+      } else {
+        const result2 = JSON.parse(
+          window.localStorage.getItem("Usuario_padrao")
+        );
+        if (result2) {
+          return result2;
+        }
+      }
+    };
+    const moveToLoginPage = () => {
+      // console.log(linha);
+      let move_To = "";
+      move_To = "/login";
+      router.push(move_To);
+    };
     // voltar
     const Voltar = () => {
       dialogCancelar.value = true;
