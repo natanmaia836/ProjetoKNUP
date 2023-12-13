@@ -23,7 +23,7 @@
                 <br />
                 <br />
                 Apresentamos o CashBach, a maneira mais inteligente de ganhar
-                dinheiro de volta.</span
+                dinheiro de volta. {{ titulo }}</span
               >
             </div>
           </div></q-card
@@ -202,10 +202,17 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   name: "LandingPage",
+
+  setup() {
+    const titulo = ref(process.env.TITULO_TESTE);
+    return {
+      titulo,
+    };
+  },
 });
 </script>
 
