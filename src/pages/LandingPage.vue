@@ -202,13 +202,17 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 
 export default defineComponent({
   name: "LandingPage",
 
   setup() {
-    const titulo = ref(process.env.TITULO_TESTE);
+    let titulo = ref(process.env.TITULO_TESTE);
+
+    onMounted(() => {
+      console.log(process.env.TITULO_TESTE);
+    });
     return {
       titulo,
     };
